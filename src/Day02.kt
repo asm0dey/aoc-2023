@@ -1,4 +1,5 @@
 fun main() {
+
     fun part1(input: List<String>): Int = input
         .asSequence()
         .map { it.split(',', ' ', ':', ';').filterNot { it.isBlank() }.chunked(2) }
@@ -17,18 +18,17 @@ fun main() {
         }
         .sumOf { it.first }
 
-    fun part2(input: List<String>): Long = input
+    fun part2(input: List<String>): Int = input
         .asSequence()
         .map { it.split(',', ' ', ':', ';').filterNot { it.isBlank() }.chunked(2) }
         .map {
             it.first()[1].toInt() to it.drop(1)
         }
-        .map { (_, games) ->
-            games.filter { it[1] == "red" }.maxOf { it[0].toInt() }.toLong() *
-                    games.filter { it[1] == "green" }.maxOf { it[0].toInt() }.toLong() *
-                    games.filter { it[1] == "blue" }.maxOf { it[0].toInt() }.toLong()
+        .sumOf { (_, games) ->
+            games.filter { it[1] == "red" }.maxOf { it[0].toInt() } *
+                    games.filter { it[1] == "green" }.maxOf { it[0].toInt() } *
+                    games.filter { it[1] == "blue" }.maxOf { it[0].toInt() }
         }
-        .sum()
 
     val test = readInput("02t1")
     part1(test).println()
