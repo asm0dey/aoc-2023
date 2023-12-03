@@ -1,6 +1,5 @@
 fun main() {
-
-    fun part1(input: List<String>): Int = input
+       fun part1(input: List<String>): Int = input
         .asSequence()
         .map { it.split(',', ' ', ':', ';').filterNot { it.isBlank() }.chunked(2) }
         .map {
