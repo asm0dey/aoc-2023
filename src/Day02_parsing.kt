@@ -3,6 +3,8 @@ import com.github.h0tk3y.betterParse.grammar.Grammar
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
 import com.github.h0tk3y.betterParse.lexer.literalToken
 import com.github.h0tk3y.betterParse.lexer.regexToken
+import com.github.h0tk3y.betterParse.st.LiftToSyntaxTreeOptions
+import com.github.h0tk3y.betterParse.st.liftToSyntaxTreeGrammar
 
 fun main() {
     data class Pull(val text: String, val amount: Int)
