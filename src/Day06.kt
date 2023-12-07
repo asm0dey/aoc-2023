@@ -1,14 +1,14 @@
-import com.github.h0tk3y.betterParse.combinators.*
+import com.github.h0tk3y.betterParse.combinators.separated
+import com.github.h0tk3y.betterParse.combinators.times
+import com.github.h0tk3y.betterParse.combinators.unaryMinus
+import com.github.h0tk3y.betterParse.combinators.use
 import com.github.h0tk3y.betterParse.grammar.Grammar
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
 import com.github.h0tk3y.betterParse.lexer.literalToken
 import com.github.h0tk3y.betterParse.lexer.regexToken
 import java.math.RoundingMode
 import java.text.DecimalFormat
-import kotlin.io.path.Path
-import kotlin.io.path.readText
 import kotlin.math.pow
-import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
 
@@ -40,9 +40,7 @@ fun main() {
 
     fun part1(input: Pair<List<Long>, List<Long>>): Long {
         return input.first.zip(input.second)
-                .map { (a, b) ->
-                    solve(a,b)
-                }
+                .map { (a, b) -> solve(a, b) }
                 .reduce { acc, l -> acc * l }
     }
 
