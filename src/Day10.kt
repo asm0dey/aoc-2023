@@ -30,11 +30,11 @@ fun main() {
         val start = map.entries.find { it.value.size == 4 }!!.key
         val visited = hashSetOf(start)
         var tails = map.entries.filter { it.value.contains(start) }.map { it.key }
-        visited.addAll(tails)
+        visited += tails
         while (true) {
             tails = tails.flatMap { map[it]!! }.filterNot { visited.contains(it) }
             if (tails.isEmpty()) break
-            visited.addAll(tails)
+            visited += tails
         }
         return visited
     }
@@ -50,17 +50,17 @@ fun main() {
             for (x in left..right) {
                 val coord = x to y
                 if (!contains(coord) && x % 2 == 0 && y % 2 == 0)
-                    res.add(coord)
+                    res += coord
             }
         }
         return res
     }
 
-    fun Pair<Int, Int>.isOuter(loop: MutableSet<Pair<Int, Int>>): Pair<Boolean, Set<Pair<Int, Int>>> {
+    fun Pair<Int, Int>.isOuter(magnifiedLoop: MutableSet<Pair<Int, Int>>): Pair<Boolean, Set<Pair<Int, Int>>> {
         val toVisit = ArrayDeque(neighbors(this))
         val visited = hashSetOf(this)
-        val maxRight = loop.maxOf { it.first } + 1
-        val maxDown = loop.maxOf { it.second } + 1
+        val maxRight = magnifiedLoop.maxOf { it.first } + 1
+        val maxDown = magnifiedLoop.maxOf { it.second } + 1
         val verticalBorders = arrayOf(-1, maxDown)
         val horizontalBorders = arrayOf(-1, maxRight)
         val alsoEmpty = hashSetOf(this)
@@ -72,28 +72,28 @@ fun main() {
                 alsoEmpty += next
                 continue
             }
-            if (loop.contains(next)) {
-                visited.add(next)
+            if (magnifiedLoop.contains(next)) {
+                visited += next
                 continue
             }
-            visited.add(next)
+            visited += next
             toVisit += neighbors(next)
         }
         return false to alsoEmpty
 
     }
 
-    fun MutableSet<Pair<Int, Int>>.removeOuter(loop: MutableSet<Pair<Int, Int>>): Set<Pair<Int, Int>> {
+    fun MutableSet<Pair<Int, Int>>.removeOuter(magnifiedLoop: MutableSet<Pair<Int, Int>>): Set<Pair<Int, Int>> {
         val tmp = toSet()
         val internal = hashSetOf<Pair<Int, Int>>()
         while (isNotEmpty()) {
             val first = first()
-            val outer = first.isOuter(loop)
+            val (outer, group) = first.isOuter(magnifiedLoop)
             remove(first)
-            removeAll(outer.second.intersect(tmp))
-            if (!outer.first) {
-                internal.add(first)
-                internal.addAll(outer.second.intersect(tmp))
+            removeAll(group.intersect(tmp))
+            if (!outer) {
+                internal += first
+                internal += group.intersect(tmp)
             }
         }
         return internal
@@ -106,27 +106,19 @@ fun main() {
 
     fun part2(test: List<String>): Int {
         val loop = findLoop(test)
-        val map = hashSetOf<Pair<Int, Int>>()
+        val magnifiedLoop = hashSetOf<Pair<Int, Int>>()
         for ((y, line) in test.withIndex()) {
             for ((x, c) in line.withIndex()) {
-                if (loop.contains(x to y)) {
-                    map.add(x * 2 to y * 2)
-                }
-                if (loop.contains(x to y) &&
-                        loop.contains(x + 1 to y) &&
-                        c in "F-LS" &&
-                        test[y][x + 1] in "-7JS") {
-                    map.add(x * 2 + 1 to y * 2)
-                }
-                if (loop.contains(x to y) &&
-                        loop.contains(x to y + 1) &&
-                        c in "F7|S" &&
-                        test[y + 1][x] in "|JLS") {
-                    map.add(x * 2 to y * 2 + 1)
-                }
+                val element = x to y
+                if (loop.contains(element))
+                    magnifiedLoop += x * 2 to y * 2
+                if (loop.contains(element) && loop.contains(x + 1 to y) && c in "F-LS" && test[y][x + 1] in "-7JS")
+                    magnifiedLoop += x * 2 + 1 to y * 2;
+                if (loop.contains(element) && loop.contains(x to y + 1) && c in "F7|S" && test[y + 1][x] in "|JLS")
+                    magnifiedLoop += x * 2 to y * 2 + 1
             }
         }
-        return map.findEmptyTiles().toHashSet().removeOuter(map).size
+        return magnifiedLoop.findEmptyTiles().toHashSet().removeOuter(magnifiedLoop).size
     }
 
     val test1 = readInput("10t1")
