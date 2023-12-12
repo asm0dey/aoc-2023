@@ -16,5 +16,6 @@ tasks {
 
 dependencies {
     implementation("io.github.copper-leaf:kudzu-core:5.1.0")
-    implementation("com.github.h0tk3y.betterParse:better-parse:0.4.4")
+    implementation("me.alllex.parsus:parsus-jvm:0.6.0")
+    implementation("io.arrow-kt:arrow-core:1.2.0")
 }

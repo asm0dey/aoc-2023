@@ -1,10 +1,8 @@
 import Instruction.LEFT
 import Instruction.RIGHT
-import com.github.h0tk3y.betterParse.combinators.*
-import com.github.h0tk3y.betterParse.grammar.Grammar
-import com.github.h0tk3y.betterParse.grammar.parseToEnd
-import com.github.h0tk3y.betterParse.lexer.literalToken
-import com.github.h0tk3y.betterParse.lexer.regexToken
+import me.alllex.parsus.parser.*
+import me.alllex.parsus.token.literalToken
+import me.alllex.parsus.token.regexToken
 import kotlin.text.RegexOption.MULTILINE
 
 
@@ -27,8 +25,8 @@ fun main() {
         val INSTR by regexToken(Regex("^[RL]+$", MULTILINE))
         val WORD by regexToken("[\\dA-Z]{3}")
 
-        val instruction by INSTR * -NL use {
-            val source = text.map { if (it == 'L') LEFT else RIGHT }
+        val instruction by INSTR * -NL map {
+            val source = it.text.map { if (it == 'L') LEFT else RIGHT }
             sequence {
                 while (true) {
                     for (c in source) {
@@ -37,11 +35,11 @@ fun main() {
                 }
             }
         }
-        val node by WORD * -` ` * -`=` * -` ` * -`(` * WORD * -`,` * -` ` * WORD * -`)` use {
-            Node(t1.text, t2.text, t3.text)
+        val node by WORD * -` ` * -`=` * -` ` * -`(` * WORD * -`,` * -` ` * WORD * -`)` map {
+            Node(it.t1.text, it.t2.text, it.t3.text)
         }
-        val nodes by separated(node, NL) use { terms.associateBy { it.source } }
-        override val rootParser by instruction * -NL * nodes use { GameMap(t1, t2) }
+        val nodes by separated(node, NL) map { it.associateBy { it.source } }
+        override val root by instruction * -NL * nodes map { GameMap(it.t1, it.t2) }
     }
 
 
@@ -101,10 +99,10 @@ fun main() {
         return lcm(loopLengths)
     }
 
-    val test = parser.parseToEnd(readInputTxt("08t1"))
-    val test2 = parser.parseToEnd(readInputTxt("08t2"))
-    val test3 = parser.parseToEnd(readInputTxt("08t3"))
-    val input = parser.parseToEnd(readInputTxt("08"))
+    val test = parser.parseOrThrow(readInputTxt("08t1"))
+    val test2 = parser.parseOrThrow(readInputTxt("08t2"))
+    val test3 = parser.parseOrThrow(readInputTxt("08t3"))
+    val input = parser.parseOrThrow(readInputTxt("08"))
     check(part1(test) == 2)
     check(part1(test2) == 6)
     part1(input).println()

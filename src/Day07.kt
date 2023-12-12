@@ -1,8 +1,6 @@
-import com.github.h0tk3y.betterParse.combinators.*
-import com.github.h0tk3y.betterParse.grammar.Grammar
-import com.github.h0tk3y.betterParse.grammar.parseToEnd
-import com.github.h0tk3y.betterParse.lexer.literalToken
-import com.github.h0tk3y.betterParse.lexer.regexToken
+import me.alllex.parsus.parser.*
+import me.alllex.parsus.token.literalToken
+import me.alllex.parsus.token.regexToken
 
 
 fun main() {
@@ -45,9 +43,9 @@ fun main() {
         val card by regexToken("[AKQJT]")
         val nl by literalToken("\n")
 
-        val cardSet by 5 times (card or num) use { map { it.text.first() } }
-        val hand by cardSet * -sp * oneOrMore(one or num) use { Hand(t1, t2.joinToString("") { it.text }.toInt()) }
-        override val rootParser by separated(hand, nl) use { Game(terms) }
+        val cardSet by 5 times (card or num) map { it.map { it.text.first() } }
+        val hand by cardSet * -sp * oneOrMore(one or num) map { Hand(it.t1, it.t2.joinToString("") { it.text }.toInt()) }
+        override val root by separated(hand, nl) map { Game(it) }
     }
 
 
@@ -71,9 +69,9 @@ fun main() {
                 .sumOf { (a, b) -> a.bid.toLong() * b }
     }
 
-    val test = parser.parseToEnd(readInputTxt("07t1"))
+    val test = parser.parseOrThrow(readInputTxt("07t1"))
     check(part1(test) == 6440L)
-    val input = parser.parseToEnd(readInputTxt("07"))
+    val input = parser.parseOrThrow(readInputTxt("07"))
     part1(input).println()
     check(part2(test) == 5905L)
     part2(input).println()

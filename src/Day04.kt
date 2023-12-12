@@ -1,10 +1,7 @@
-import com.github.h0tk3y.betterParse.combinators.*
-import com.github.h0tk3y.betterParse.grammar.Grammar
-import com.github.h0tk3y.betterParse.grammar.parseToEnd
-import com.github.h0tk3y.betterParse.lexer.literalToken
-import com.github.h0tk3y.betterParse.lexer.regexToken
-import com.github.h0tk3y.betterParse.parser.Parser
 import kotlin.math.pow
+import me.alllex.parsus.parser.*
+import me.alllex.parsus.token.literalToken
+import me.alllex.parsus.token.regexToken
 
 fun main() {
     data class Game(val num: Int, val intersectionSize: Int)
@@ -16,22 +13,22 @@ fun main() {
         val pipe by literalToken("|")
         val num by regexToken("\\d+")
         val nl by literalToken("\n")
-        val numList by separated(num, sp) use { terms.map { it.text.toInt() }.toSet() }
-        val cardName by -cardLit * -sp * num * -colon * -sp use { text.toInt() }
+        val numList by separated(num, sp) map { it.map { it.text.toInt() }.toSet() }
+        val cardName by -cardLit * -sp * num * -colon * -sp map { it.text.toInt() }
         val sep by sp * pipe * sp
-        val game by cardName * numList * -sep * numList use { Game(t1, t2.intersect(t3).size) }
-        override val rootParser by separated(game, nl) use { terms }
+        val game by cardName * numList * -sep * numList map { Game(it.t1, it.t2.intersect(it.t3).size) }
+        override val root by separated(game, nl)
     }
 
     fun part1(input: List<Game>): Int = input.sumOf { (_, b) -> 2.0.pow(b - 1).toInt() }
 
     fun part2(input: List<Game>): Int {
         val map = input.groupBy { it.num }
-            .mapValues {
-                val game = it.value.first()
-                it.value.size to game.intersectionSize
-            }
-            .toSortedMap()
+                .mapValues {
+                    val game = it.value.first()
+                    it.value.size to game.intersectionSize
+                }
+                .toSortedMap()
         map.keys.forEach { current ->
             val (amount, intersectionSize) = map[current]!!
             repeat(intersectionSize) {
@@ -42,9 +39,9 @@ fun main() {
         return map.values.sumOf { it.first }
     }
 
-    val test = parser.parseToEnd(readInputTxt("04t1"))
+    val test = parser.parse(readInputTxt("04t1")).getOrThrow()
     check(part1(test) == 13)
-    val input = parser.parseToEnd(readInputTxt("04"))
+    val input = parser.parse(readInputTxt("04")).getOrThrow()
     part1(input).println()
     check(part2(test) == 30)
     part2(input).println()

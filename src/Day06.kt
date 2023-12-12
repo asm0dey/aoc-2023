@@ -1,11 +1,6 @@
-import com.github.h0tk3y.betterParse.combinators.separated
-import com.github.h0tk3y.betterParse.combinators.times
-import com.github.h0tk3y.betterParse.combinators.unaryMinus
-import com.github.h0tk3y.betterParse.combinators.use
-import com.github.h0tk3y.betterParse.grammar.Grammar
-import com.github.h0tk3y.betterParse.grammar.parseToEnd
-import com.github.h0tk3y.betterParse.lexer.literalToken
-import com.github.h0tk3y.betterParse.lexer.regexToken
+import me.alllex.parsus.parser.*
+import me.alllex.parsus.token.literalToken
+import me.alllex.parsus.token.regexToken
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import kotlin.math.pow
@@ -21,9 +16,9 @@ fun main() {
         val nl by literalToken("\n")
         val timeLit by literalToken("Time")
         val distLit by literalToken("Distance")
-        val times by -timeLit * -colon * -sp * separated(num, sp) use { terms.map { it.text.toLong() } }
-        val distances by -distLit * -colon * -sp * separated(num, sp) use { terms.map { it.text.toLong() } }
-        override val rootParser by times * -nl * distances use { t1 to t2 }
+        val times by -timeLit * -colon * -sp * separated(num, sp) map { it.map { it.text.toLong() } }
+        val distances by -distLit * -colon * -sp * separated(num, sp) map { it.map { it.text.toLong() } }
+        override val root by times * -nl * distances map { it.toPair() }
     }
 
     fun solve(a: Long, b: Long): Long {
@@ -51,9 +46,9 @@ fun main() {
         return solve(a, b)
     }
 
-    val test = parser.parseToEnd(readInputTxt("06t1"))
+    val test = parser.parseOrThrow(readInputTxt("06t1"))
     check(part1(test) == 288L)
-    val input = parser.parseToEnd(readInputTxt("06"))
+    val input = parser.parseOrThrow(readInputTxt("06"))
     part1(input).println()
     check(part2(test) == 71503L)
     part2(input).println()
