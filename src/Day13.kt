@@ -1,16 +1,29 @@
 fun main() {
-    fun <T> Iterable<T>.chunkBy(predicate: (T) -> Boolean): Sequence<List<T>> {
-        return sequence {
-            val result = arrayListOf<T>()
-            for (s in this@chunkBy) {
-                if (predicate(s)) {
-                    yield(result.toList())
-                    result.clear()
-                } else result.add(s)
+    fun <T> Iterable<T>.chunkBy(predicate: (T) -> Boolean): Sequence<List<T>> = sequence {
+        val result = fold(emptyList<T>()) { acc, element ->
+            if (predicate(element)) {
+                yield(acc)
+                emptyList()
+            } else {
+                acc + element
             }
-            if (result.isNotEmpty()) yield(result)
         }
+        if (result.isNotEmpty()) yield(result)
     }
+
+    tailrec fun List<String>.checkSymmetry(i0: Int, i1: Int, additionalPredicate: ((String, String) -> Boolean)?): Boolean =
+            when {
+                i0 in indices && i1 in indices -> when {
+                    this[i0] == this[i1] -> checkSymmetry(i0 - 1, i1 + 1, additionalPredicate)
+                    additionalPredicate != null && additionalPredicate(this[i0], this[i1]) ->
+                        checkSymmetry(i0 - 1, i1 + 1, null)
+
+                    else -> false
+                }
+
+                else -> true
+            }
+
 
     fun List<String>.findVerticalReflection(additionalPredicate: ((String, String) -> Boolean)? = null) =
             asSequence()
@@ -18,50 +31,29 @@ fun main() {
                     .windowed(2)
                     .filter { (a, b) -> a.value == b.value || (additionalPredicate != null && additionalPredicate(a.value, b.value)) }
                     .map { (a, b) -> a to b }
-                    .filter { (a, b) ->
-                        var usedPredicate = false
-                        var i0 = a.index
-                        var i1 = b.index
-                        while (i0 in indices && i1 in indices) {
-                            val s0 = this[i0]
-                            val s1 = this[i1]
-                            if (s0 == s1) {
-                                i0--
-                                i1++
-                                continue
-                            }
-                            if (additionalPredicate != null && !usedPredicate && additionalPredicate(s0, s1)) {
-                                usedPredicate = true
-                                i0--
-                                i1++
-                                continue
-                            }
-                            return@filter false
-                        }
-                        true
-                    }
+                    .filter { (a, b) -> checkSymmetry(a.index, b.index, additionalPredicate) }
 
-    fun findHorizontalReflection(strings: List<String>, additionalPredicate: ((String, String) -> Boolean)? = null) =
-            strings[0]
+
+    fun List<String>.findHorizontalReflection(additionalPredicate: ((String, String) -> Boolean)? = null) =
+            this[0]
                     .indices
-                    .map { idx -> strings.map { it[idx] }.joinToString("") }
+                    .map { idx -> map { it[idx] }.joinToString("") }
                     .findVerticalReflection(additionalPredicate)
 
 
-    val smallDistance = { a: String, b: String ->
-        var counter = 0
-        for (i in 0 until maxOf(a.length, b.length)) {
-            if (i >= a.length || i >= b.length) counter++
-            if (a[i] != b[i]) counter++
-        }
-        counter <= 1
+    fun smallDistance(a: String, b: String): Boolean {
+        val maxLength = maxOf(a.length, b.length)
+
+        val counter = (0 until maxLength).count { it >= a.length || it >= b.length || a[it] != b[it] }
+
+        return counter <= 1
     }
 
     fun part1(input: List<String>): Int = input
             .chunkBy(String::isBlank)
             .sumOf {
                 val vert = it.findVerticalReflection().firstOrNull()?.first?.index?.plus(1)
-                val horizontal = findHorizontalReflection(it).firstOrNull()?.first?.index?.plus(1)
+                val horizontal = it.findHorizontalReflection().firstOrNull()?.first?.index?.plus(1)
                 (vert ?: 0) * 100 + (horizontal ?: 0)
             }
 
@@ -69,11 +61,11 @@ fun main() {
             .chunkBy(String::isBlank)
             .sumOf { lines ->
                 val initialVertical = lines.findVerticalReflection().firstOrNull()?.first?.index?.plus(1)
-                val newVertical = lines.findVerticalReflection(smallDistance)
+                val newVertical = lines.findVerticalReflection(::smallDistance)
                         .map { it.first.index + 1 }
                         .firstOrNull { it != initialVertical }
-                val initialHorizontal = findHorizontalReflection(lines).firstOrNull()?.first?.index?.plus(1)
-                val newHorizon = findHorizontalReflection(lines, smallDistance)
+                val initialHorizontal = lines.findHorizontalReflection().firstOrNull()?.first?.index?.plus(1)
+                val newHorizon = lines.findHorizontalReflection(::smallDistance)
                         .map { it.first.index + 1 }
                         .firstOrNull { it != initialHorizontal }
                 (newVertical ?: 0) * 100 + (newHorizon ?: 0)
