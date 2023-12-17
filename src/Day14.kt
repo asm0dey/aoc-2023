@@ -1,21 +1,10 @@
 import arrow.core.curried
-import arrow.core.memoize
-import kotlin.io.path.Path
-import kotlin.io.path.readLines
 
 fun main() {
-    fun printMap(input: List<String>, map: Map<Pair<Int, Int>, Char>) {
-        for (y in input.indices) {
-            for (x in input[0].indices) {
-                print(map[x to y] ?: '.')
-            }
-            print('\n')
-        }
-    }
 
     fun moveNorth(map: Collection<Pair<Int, Int>>, x: Int, y: Int, stableRocks: Set<Pair<Int, Int>>): Pair<Int, Int> {
         val boulder = (0 until y).lastOrNull { stableRocks.contains(x to it) } ?: 0
-        return x to y - (y downTo boulder).count { x to it !in map && x to it !in stableRocks }
+        return (x to y - (y downTo boulder).count { x to it !in map && x to it !in stableRocks }).also { println("$x $y [${it.first} ${it.second}]") }
     }
 
     fun moveSouth(map: Collection<Pair<Int, Int>>, x: Int, y: Int, stableRocks: Set<Pair<Int, Int>>, lastIdx: Int): Pair<Int, Int> {
