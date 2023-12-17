@@ -84,15 +84,17 @@ fun main() {
         return load(moveMapNorth(stableRocks, unstableRocks), input)
     }
 
+    fun <T, R> ((T) -> R).asReceiver(): T.() -> R = this
+
     fun part2(input: List<String>): Int {
         val (stableRocks, unstableRocks) = stableAndUnstable(input)
-        val memoNorth = ::moveMapNorth.curried()(stableRocks)
-        val memoWest = ::moveMapWest.curried()(stableRocks)
-        val memoSouth = ::moveMapSouth.curried()(stableRocks)(input.size - 1)
-        val memoEast = ::moveMapEast.curried()(stableRocks)(input[0].length - 1)
+        val curNorth = ::moveMapNorth.curried()(stableRocks).asReceiver()
+        val curWest = ::moveMapWest.curried()(stableRocks).asReceiver()
+        val curSouth = ::moveMapSouth.curried()(stableRocks)(input.size - 1).asReceiver()
+        val curEast = ::moveMapEast.curried()(stableRocks)(input[0].length - 1).asReceiver()
         val iterations = arrayListOf(unstableRocks)
         while (true) {
-            iterations.add(memoEast(memoSouth(memoWest(memoNorth(iterations.last())))))
+            iterations += iterations.last().curNorth().curWest().curSouth().curEast()
             val seq = findRepeatingPattern(iterations)
             if (seq != null) {
                 println("Pattern found! Starts at ${seq.first}, length is ${seq.second}")

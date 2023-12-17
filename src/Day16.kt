@@ -11,12 +11,12 @@ private fun Array<CharArray>.isSafe(at: Point) =
 
 operator fun Array<CharArray>.get(at: Point): Char =
         this[at.y][at.x]
+val UP = Point(0, -1)
+val LEFT = Point(1, 0)
+val DOWN = Point(0, 1)
+val RIGHT = Point(-1, 0)
 
 fun main() {
-    val UP = Point(0, -1)
-    val LEFT = Point(1, 0)
-    val DOWN = Point(0, 1)
-    val RIGHT = Point(-1, 0)
     val movements = mapOf(
             '-' to UP to listOf(LEFT, RIGHT),
             '-' to DOWN to listOf(LEFT, RIGHT),
