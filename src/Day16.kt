@@ -5,16 +5,18 @@ val Point.y get() = second
 operator fun Point.minus(other: Point) = Point(x - other.x, y - other.y)
 
 operator fun Point.plus(other: Point) = Point(x + other.x, y + other.y)
+operator fun Point.times(amount: Int) = Point(x * amount, y * amount)
 
 private fun Array<CharArray>.isSafe(at: Point) =
         at.y in indices && at.x in this[at.y].indices
 
 operator fun Array<CharArray>.get(at: Point): Char =
         this[at.y][at.x]
+
 val UP = Point(0, -1)
-val LEFT = Point(1, 0)
+val LEFT = Point(-1, 0)
 val DOWN = Point(0, 1)
-val RIGHT = Point(-1, 0)
+val RIGHT = Point(1, 0)
 
 fun main() {
     val movements = mapOf(
