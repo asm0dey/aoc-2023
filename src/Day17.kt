@@ -1,31 +1,6 @@
 import arrow.core.partially2
 import java.util.*
 
-fun <T> dijkstraSearch(
-        startingPoints: List<T>,
-        neighbors: T.() -> List<T>,
-        distanceBetween: (currentNode: T, nextNode: T) -> UInt,
-): Map<T, UInt> {
-    data class State(val node: T, val distance: UInt)
-
-    val bestDistance = hashMapOf<T, UInt>()
-    val boundary = PriorityQueue<State>(compareBy { it.distance })
-
-    for (start in startingPoints) boundary += State(start, 0u)
-
-    while (boundary.isNotEmpty()) {
-        val (currentNode, currentDistance) = boundary.poll()
-        if (currentNode in bestDistance) continue
-
-        bestDistance[currentNode] = currentDistance
-
-        for (nextNode in neighbors(currentNode))
-            if (nextNode !in bestDistance)
-                boundary += State(nextNode, currentDistance + distanceBetween(currentNode, nextNode))
-    }
-
-    return bestDistance
-}
 
 fun main() {
     data class State(val position: Point, val dir: Point, val sameDirMoves: Int)

@@ -50,9 +50,9 @@ fun main() {
         val nl by literalToken("\n", ignored = true)
         val num by regexToken("\\d+")
         val word by regexToken("[a-zA-Z]+")
-        val parameter = word * -`=` * num
-        val part = -`{` * separated(parameter, `,`) * -`}` map { (xp, mp, ap, sp) ->
-            Part(xp.second.text.toInt(), mp.second.text.toInt(), ap.second.text.toInt(), sp.second.text.toInt())
+        val parameter by word * -`=` * num
+        val part by -`{` * separated(parameter, `,`) * -`}` map { (x, m, a, s) ->
+            Part(x.second.text.toInt(), m.second.text.toInt(), a.second.text.toInt(), s.second.text.toInt())
         }
         val parts by separated(part, nl)
         abstract val workflows: Parser<List<Day19Workflow>>
@@ -63,23 +63,23 @@ fun main() {
 
     val parser1 = object : Day19Grammar() {
 
-        val rule by word * (less or more) * num * -colon * word map { (a, b, c, d) ->
-            fun(p: Part): String? {
-                val data = when (a.text) {
-                    "x" -> p.x
-                    "m" -> p.m
-                    "a" -> p.a
-                    "s" -> p.s
-                    else -> error("WTF is ${a.text}")
+        val rule by word * (less or more) * num * -colon * word map { (field, sign, target, nextRule) ->
+            fun Part.(): String? {
+                val data = when (field.text) {
+                    "x" -> x
+                    "m" -> m
+                    "a" -> a
+                    "s" -> s
+                    else -> error("WTF is ${field.text}")
                 }
-                val expected = c.text.toInt()
+                val expected = target.text.toInt()
 
-                val comparison = when (b.text) {
+                val comparison = when (sign.text) {
                     ">" -> data > expected
                     "<" -> data < expected
-                    else -> error("WTF is ${b.text}")
+                    else -> error("WTF is ${sign.text}")
                 }
-                return if (comparison) d.text else null
+                return if (comparison) nextRule.text else null
             }
         }
         val workflow by word * -`{` * separated(rule, `,`, trailingSeparator = true) * word * -`}` map { (a, b, c) ->
@@ -177,33 +177,29 @@ fun main() {
         val map = (workflows + Accepted + Rejected).associateBy { it.name }
         val inputWorkflow = map["in"]!!
         val accepted = hashSetOf<RangePart>()
-        val rejected = hashSetOf<RangePart>()
         val review = ArrayDeque(listOf(RangePart(1..4000, 1..4000, 1..4000, 1..4000) to inputWorkflow))
-while (review.isNotEmpty()) {
-    val (part, curWorkflow) = review.removeFirst()
-    when (curWorkflow) {
-        Accepted -> accepted += part
-        Rejected -> rejected += part
-        is RangeRuleWorkflow -> {
-            val localReview = ArrayDeque(listOf(part))
-            while (localReview.isNotEmpty()) {
-                for (block in curWorkflow.blocks) {
-                    val nextP = localReview.removeFirst()
-                    val list = nextP.block()
-                    for ((nextPart, nextFlow) in list) {
-                        if (nextFlow != null)
-                            review.add(nextPart to map[nextFlow]!!)
-                        else
-                            localReview.add(nextPart)
+        while (review.isNotEmpty()) {
+            val (part, curWorkflow) = review.removeFirst()
+            when (curWorkflow) {
+                Accepted -> accepted += part
+                Rejected -> {}
+                is RangeRuleWorkflow -> {
+                    val localReview = ArrayDeque(listOf(part))
+                    while (localReview.isNotEmpty()) {
+                        for (block in curWorkflow.blocks) {
+                            val next = localReview.removeFirst()
+                            val list = next.block()
+                            for ((nextPart, nextFlow) in list) {
+                                if (nextFlow != null) review.add(nextPart to map[nextFlow]!!)
+                                else localReview.add(nextPart)
+                            }
+                        }
                     }
                 }
+
+                else -> error("Unsupported workflow: $curWorkflow")
             }
         }
-
-        else -> error("Unsupported workflow: $curWorkflow")
-    }
-
-}
 
         return accepted.sumOf(RangePart::count)
     }

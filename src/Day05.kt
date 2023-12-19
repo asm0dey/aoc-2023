@@ -29,18 +29,20 @@ fun main() {
         val nl by literalToken("\n", "newline")
         val sp by regexToken(" +", "space")
         val colon by literalToken(":")
+        val seedLit by literalToken("seeds")
+        val toLit by literalToken("-to-")
+        val mapLit by literalToken("map")
         val word by regexToken("[a-zA-Z]+")
-        val dash by literalToken("-")
         val range by num * -sp * num * -sp * num map {
             MappingEntry(it.t1.text.toLong(), it.t2.text.toLong(), it.t3.text.toLong())
         }
         val ranges by separated(range, nl)
-        val mappingName by word * -dash * -word * -dash * word * -sp * -word * -colon * -nl
-        val mapping by -mappingName * ranges * -nl map { Mapping(it) }
-        val mappings by separated(mapping, nl)
-        val seeds by -word * -colon * -sp * separated(num, sp) * -nl * -nl map { it.map { it.text.toLong() } }
+        val mappingName by word * -toLit * word * -sp * -mapLit * -colon * -nl
+        val mapping by -mappingName * ranges map { Mapping(it) }
+        val mappings by separated(mapping, nl * nl)
+        val seeds by -seedLit * -colon * -sp * separated(num, sp) * -nl * -nl map { it.map { it.text.toLong() } }
 
-        override val root by parser { seeds() to mappings() }
+        override val root by seeds * mappings map { it.t1 to it.t2 }
     }
 
     fun Map<String, Pair<String, List<Pair<LongRange, LongRange>>>>.toChain(): List<List<Pair<LongRange, LongRange>>> {

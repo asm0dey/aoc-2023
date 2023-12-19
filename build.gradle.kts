@@ -16,6 +16,6 @@ tasks {
 
 dependencies {
     implementation("io.github.copper-leaf:kudzu-core:5.1.0")
-    implementation("me.alllex.parsus:parsus-jvm:0.6.0")
+    implementation("me.alllex.parsus:parsus-jvm:0.6.1")
     implementation("io.arrow-kt:arrow-core:1.2.0")
 }
