@@ -179,31 +179,31 @@ fun main() {
         val accepted = hashSetOf<RangePart>()
         val rejected = hashSetOf<RangePart>()
         val review = ArrayDeque(listOf(RangePart(1..4000, 1..4000, 1..4000, 1..4000) to inputWorkflow))
-        while (review.isNotEmpty()) {
-            val (part, curWorkflow) = review.removeFirst()
-            when (curWorkflow) {
-                Accepted -> accepted += part
-                Rejected -> rejected += part
-                is RangeRuleWorkflow -> {
-                    val localReview = ArrayDeque(listOf(part))
-                    while (localReview.isNotEmpty()) {
-                        outer@ for (block in curWorkflow.blocks) {
-                            val nextP = localReview.removeFirst()
-                            val list = nextP.block()
-                            for ((nextPart, nextFlow) in list) {
-                                if (nextFlow != null)
-                                    review.add(nextPart to map[nextFlow]!!)
-                                else
-                                    localReview.add(nextPart)
-                            }
-                        }
+while (review.isNotEmpty()) {
+    val (part, curWorkflow) = review.removeFirst()
+    when (curWorkflow) {
+        Accepted -> accepted += part
+        Rejected -> rejected += part
+        is RangeRuleWorkflow -> {
+            val localReview = ArrayDeque(listOf(part))
+            while (localReview.isNotEmpty()) {
+                for (block in curWorkflow.blocks) {
+                    val nextP = localReview.removeFirst()
+                    val list = nextP.block()
+                    for ((nextPart, nextFlow) in list) {
+                        if (nextFlow != null)
+                            review.add(nextPart to map[nextFlow]!!)
+                        else
+                            localReview.add(nextPart)
                     }
                 }
-
-                else -> error("Unsupported workflow: $curWorkflow")
             }
-
         }
+
+        else -> error("Unsupported workflow: $curWorkflow")
+    }
+
+}
 
         return accepted.sumOf(RangePart::count)
     }
