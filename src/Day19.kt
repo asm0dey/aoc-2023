@@ -40,21 +40,23 @@ private sealed interface Day19Workflow {
 
 fun main() {
     abstract class Day19Grammar : Grammar<Pair<List<Day19Workflow>, List<Part>>>() {
+        init {
+            regexToken("\\s+", ignored = true)
+        }
         val `{` by literalToken("{")
         val `}` by literalToken("}")
-        val less by literalToken("<")
-        val more by literalToken(">")
+        val less by literalToken("<", "<")
+        val more by literalToken(">", ">")
         val `=` by literalToken("=")
-        val colon by literalToken(":")
+        val colon by literalToken(":", ":")
         val `,` by literalToken(",")
-        val nl by literalToken("\n", ignored = true)
         val num by regexToken("\\d+")
         val word by regexToken("[a-zA-Z]+")
         val parameter by word * -`=` * num
         val part by -`{` * separated(parameter, `,`) * -`}` map { (x, m, a, s) ->
             Part(x.second.text.toInt(), m.second.text.toInt(), a.second.text.toInt(), s.second.text.toInt())
         }
-        val parts by separated(part, nl)
+        val parts by oneOrMore(part)
         abstract val workflows: Parser<List<Day19Workflow>>
 
         override val root: Parser<Pair<List<Day19Workflow>, List<Part>>>
@@ -85,7 +87,7 @@ fun main() {
         val workflow by word * -`{` * separated(rule, `,`, trailingSeparator = true) * word * -`}` map { (a, b, c) ->
             RuleWorkflow(a.text, b + { _: Part -> c.text })
         }
-        override val workflows by separated(workflow, nl, trailingSeparator = true)
+        override val workflows by oneOrMore(workflow)
 
     }
 
@@ -130,7 +132,7 @@ fun main() {
         val workflow by word * -`{` * separated(rule, `,`, trailingSeparator = true) * word * -`}` map { (a, b, c) ->
             RangeRuleWorkflow(a.text, b + { listOf(this to c.text) })
         }
-        override val workflows by separated(workflow, nl, trailingSeparator = true)
+        override val workflows by oneOrMore(workflow)
     }
 
     fun part1(input: String): Int {

@@ -58,25 +58,6 @@ fun main() {
         return counter
     }
 
-    fun lcmFor2(a: Long, b: Long): Long {
-        val larger = if (a > b) a else b
-        val maxLcm = a * b
-        var lcm = larger
-        while (lcm <= maxLcm) {
-            if (lcm % a == 0L && lcm % b == 0L) return lcm
-            lcm += larger
-        }
-        return maxLcm
-    }
-
-    fun lcm(loopLengths: ArrayList<Long>): Long {
-        var lcm = 1L
-        for (number in loopLengths) {
-            lcm = lcmFor2(lcm, number)
-        }
-        return lcm
-    }
-
     fun part2(test: GameMap): Long {
         val map = test.nodes
         val cur = map.filter { it.key.endsWith('A') }

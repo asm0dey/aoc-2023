@@ -15,8 +15,8 @@ fun readInputTxt(name: String) = Path("src/$name.txt").readText()
  * Converts string to md5 hash.
  */
 fun String.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteArray()))
-    .toString(16)
-    .padStart(32, '0')
+        .toString(16)
+        .padStart(32, '0')
 
 /**
  * The cleaner shorthand for printing output.
@@ -47,4 +47,31 @@ fun <T> dijkstraSearch(
     }
 
     return bestDistance
+}
+
+fun lcmFor2(a: Long, b: Long): Long {
+    val larger = if (a > b) a else b
+    val maxLcm = a * b
+    var lcm = larger
+    while (lcm <= maxLcm) {
+        if (lcm % a == 0L && lcm % b == 0L) return lcm
+        lcm += larger
+    }
+    return maxLcm
+}
+
+fun lcm(loopLengths: Iterable<Long>): Long {
+    var lcm = 1L
+    for (number in loopLengths) {
+        lcm = lcmFor2(lcm, number)
+    }
+    return lcm
+}
+
+fun lcm(vararg loopLengths: Long): Long {
+    var lcm = 1L
+    for (number in loopLengths) {
+        lcm = lcmFor2(lcm, number)
+    }
+    return lcm
 }
