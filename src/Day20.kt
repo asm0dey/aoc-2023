@@ -1,6 +1,5 @@
 import Day20Domain.Module
 import Day20Domain.Module.*
-import Day20Domain.Pulse
 import Day20Domain.Pulse.HIGH
 import Day20Domain.Pulse.LOW
 import me.alllex.parsus.parser.*
@@ -31,9 +30,7 @@ class Day20Domain {
                 }
             }
 
-            override fun toString(): String {
-                return "FlipFlop(name='$name', on=$on, targets=$targets)"
-            }
+            override fun toString() = "FlipFlop(name='$name', on=$on, targets=$targets)"
 
         }
 
@@ -51,9 +48,7 @@ class Day20Domain {
                 else targets.map { it to HIGH }
             }
 
-            override fun toString(): String {
-                return "Conjunction(name='$name', targets=$targets, memory=$memory)"
-            }
+            override fun toString() = "Conjunction(name='$name', targets=$targets, memory=$memory)"
 
         }
 
@@ -62,9 +57,7 @@ class Day20Domain {
                 return targets.map { it to pulse }
             }
 
-            override fun toString(): String {
-                return "Broadcaster(name='$name', targets=$targets)"
-            }
+            override fun toString() = "Broadcaster(name='$name', targets=$targets)"
 
         }
 
@@ -74,15 +67,14 @@ class Day20Domain {
                 return null
             }
 
-            override fun toString(): String {
-                return "Output(name='$name')"
-            }
+            override fun toString() = "Output(name='$name')"
         }
     }
 }
 
 fun main() {
-    @Suppress("ObjectPropertyName") val parser = object : Grammar<List<Module>>() {
+    @Suppress("ObjectPropertyName")
+    val parser = object : Grammar<List<Module>>() {
         init {
             regexToken(" +", ignored = true)
         }
