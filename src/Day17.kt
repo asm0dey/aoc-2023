@@ -13,14 +13,14 @@ fun main() {
             val (a, b) = newPosition
             if (a !in this@neighbors.indices || b !in this@neighbors[0].indices) continue
             if (movesSoFar > maxMoves) continue
-            if (dir.first * -1 == state.dir.first && dir.second * -1 == state.dir.second) continue
+            if (dir.x * -1 == state.dir.x && dir.y * -1 == state.dir.y) continue
             if (dir != state.dir && state.sameDirMoves < minMoves) continue
 
             add(State(newPosition, dir, movesSoFar))
         }
     }
 
-    fun startingPoint(dir: Pair<Int, Int>): State = State(Point(0, 0), dir, 0)
+    fun startingPoint(dir: Point): State = State(Point(0, 0), dir, 0)
 
     fun solve(s: List<String>, minMoves: Int = 1, maxMoves: Int = 3): UInt {
         val grid = s.map { it.map { char -> char.toString().toInt() } }
@@ -29,7 +29,7 @@ fun main() {
         val neighbors = grid::neighbors.partially2(minMoves).partially2(maxMoves)
 
         val bestDistance = dijkstraSearch(startingPoints, neighbors) { _, nextNode ->
-            grid[nextNode.position.first][nextNode.position.second].toUInt()
+            grid[nextNode.position.x][nextNode.position.y].toUInt()
         }
         val result = bestDistance.filter { (k, _) -> k.position == Point(grid.indices.last, grid[0].indices.last) }
         result.forEach { (k, v) -> println("$k $v") }
@@ -43,3 +43,5 @@ fun main() {
     println(solve(test, 4, 10))
     println(solve(input, 4, 10))
 }
+
+fun Pair<Int, Int>.toPoint(): Point = Point(first, second)

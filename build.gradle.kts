@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm") version "1.9.21"
+    id("com.google.devtools.ksp") version "1.9.21-1.0.15"
 }
 
 sourceSets {
@@ -17,5 +18,7 @@ tasks {
 dependencies {
     implementation("io.github.copper-leaf:kudzu-core:5.1.0")
     implementation("me.alllex.parsus:parsus-jvm:0.6.1")
+    implementation("io.arrow-kt:arrow-optics:1.2.0")
+    ksp("io.arrow-kt:arrow-optics-ksp-plugin:1.2.0")
     implementation("io.arrow-kt:arrow-core:1.2.0")
 }

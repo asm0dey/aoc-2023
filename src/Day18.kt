@@ -18,7 +18,7 @@ fun main() {
                         else -> error("WFT is $d")
                     }, n.toInt())
                 }
-        var curPos = 0 to 0
+        var curPos = Point(0,0)
         val dugOut = hashSetOf(curPos)
         for (command in commands) {
             repeat(command.amount) {
@@ -27,7 +27,7 @@ fun main() {
                 curPos = newPos
             }
         }
-        val toVisit = ArrayDeque(listOf(1 to 1))
+        val toVisit = ArrayDeque(listOf(Point(1,1)))
         val found = hashSetOf<Point>()
         while (toVisit.isNotEmpty()) {
             val next = toVisit.removeFirst()
@@ -56,7 +56,7 @@ fun main() {
                     val amount = c.substring(0..4).hexToInt()
                     DigCommand(dir, amount)
                 }
-        val angles = arrayListOf(0 to 0)
+        val angles = arrayListOf(Point(0,0))
         var perimeter = 0L
         for (command in commands) {
             perimeter += command.amount

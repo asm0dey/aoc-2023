@@ -1,5 +1,8 @@
 import arrow.core.curried
 
+fun <T, R> ((T) -> R).asReceiver(): T.() -> R = this
+fun <T, T2, R> ((T, T2) -> R).asReceiver(): T.(T2) -> R = this
+
 fun main() {
 
     fun moveNorth(map: Collection<Pair<Int, Int>>, x: Int, y: Int, stableRocks: Set<Pair<Int, Int>>): Pair<Int, Int> {
@@ -7,7 +10,13 @@ fun main() {
         return (x to y - (y downTo boulder).count { x to it !in map && x to it !in stableRocks }).also { println("$x $y [${it.first} ${it.second}]") }
     }
 
-    fun moveSouth(map: Collection<Pair<Int, Int>>, x: Int, y: Int, stableRocks: Set<Pair<Int, Int>>, lastIdx: Int): Pair<Int, Int> {
+    fun moveSouth(
+        map: Collection<Pair<Int, Int>>,
+        x: Int,
+        y: Int,
+        stableRocks: Set<Pair<Int, Int>>,
+        lastIdx: Int
+    ): Pair<Int, Int> {
         val boulder = (y..lastIdx).firstOrNull { stableRocks.contains(x to it) } ?: lastIdx
         return x to y + (y..boulder).count { x to it !in map && x to it !in stableRocks }
     }
@@ -17,37 +26,51 @@ fun main() {
         return (x - (x downTo boulder).count { it to y !in map && it to y !in stableRocks }) to y
     }
 
-    fun moveEast(map: Collection<Pair<Int, Int>>, x: Int, y: Int, stableRocks: Set<Pair<Int, Int>>, lastIdx: Int): Pair<Int, Int> {
+    fun moveEast(
+        map: Collection<Pair<Int, Int>>,
+        x: Int,
+        y: Int,
+        stableRocks: Set<Pair<Int, Int>>,
+        lastIdx: Int
+    ): Pair<Int, Int> {
         val boulder = (x..lastIdx).firstOrNull { stableRocks.contains(it to y) } ?: lastIdx
         return (x + (x..boulder).count { it to y !in map && it to y !in stableRocks }) to y
     }
 
     fun moveMapNorth(stableRocks: Set<Pair<Int, Int>>, unstableRocks: Collection<Pair<Int, Int>>): Set<Pair<Int, Int>> {
         return unstableRocks
-                .map { (x, y) -> moveNorth(unstableRocks, x, y, stableRocks) }
-                .toSet()
+            .map { (x, y) -> moveNorth(unstableRocks, x, y, stableRocks) }
+            .toSet()
     }
 
     fun moveMapWest(stableRocks: Set<Pair<Int, Int>>, unstableRocks: Collection<Pair<Int, Int>>): Set<Pair<Int, Int>> {
         return unstableRocks
-                .map { (x, y) -> moveWest(unstableRocks, x, y, stableRocks) }
-                .toSet()
+            .map { (x, y) -> moveWest(unstableRocks, x, y, stableRocks) }
+            .toSet()
     }
 
-    fun moveMapSouth(stableRocks: Set<Pair<Int, Int>>, lastIdx: Int, unstableRocks: Collection<Pair<Int, Int>>): Set<Pair<Int, Int>> {
+    fun moveMapSouth(
+        stableRocks: Set<Pair<Int, Int>>,
+        lastIdx: Int,
+        unstableRocks: Collection<Pair<Int, Int>>
+    ): Set<Pair<Int, Int>> {
         return unstableRocks
-                .map { (x, y) -> moveSouth(unstableRocks, x, y, stableRocks, lastIdx) }
-                .toSet()
+            .map { (x, y) -> moveSouth(unstableRocks, x, y, stableRocks, lastIdx) }
+            .toSet()
     }
 
-    fun moveMapEast(stableRocks: Set<Pair<Int, Int>>, lastIdx: Int, unstableRocks: Collection<Pair<Int, Int>>): Set<Pair<Int, Int>> {
+    fun moveMapEast(
+        stableRocks: Set<Pair<Int, Int>>,
+        lastIdx: Int,
+        unstableRocks: Collection<Pair<Int, Int>>
+    ): Set<Pair<Int, Int>> {
         return unstableRocks
-                .map { (x, y) -> moveEast(unstableRocks, x, y, stableRocks, lastIdx) }
-                .toSet()
+            .map { (x, y) -> moveEast(unstableRocks, x, y, stableRocks, lastIdx) }
+            .toSet()
     }
 
     fun load(unstableRocks: Collection<Pair<Int, Int>>, input: List<String>) =
-            unstableRocks.sumOf { input.size - it.second }
+        unstableRocks.sumOf { input.size - it.second }
 
 
     fun <T> findRepeatingPattern(elements: List<T>): Pair<Int, Int>? {
@@ -68,14 +91,14 @@ fun main() {
 
     fun stableAndUnstable(input: List<String>): Pair<Set<Pair<Int, Int>>, Set<Pair<Int, Int>>> {
         val map = input
-                .flatMapIndexed { y, line ->
-                    line.mapIndexed { x, c ->
-                        (x to y) to c
-                    }
+            .flatMapIndexed { y, line ->
+                line.mapIndexed { x, c ->
+                    (x to y) to c
                 }
-                .filter { it.second in arrayOf('#', 'O') }
-                .groupBy { it.second }
-                .mapValues { it.value.map { it.first } }
+            }
+            .filter { it.second in arrayOf('#', 'O') }
+            .groupBy { it.second }
+            .mapValues { it.value.map { it.first } }
         return Pair(map['#']!!.toSet(), map['O']!!.toSet())
     }
 
@@ -84,7 +107,6 @@ fun main() {
         return load(moveMapNorth(stableRocks, unstableRocks), input)
     }
 
-    fun <T, R> ((T) -> R).asReceiver(): T.() -> R = this
 
     fun part2(input: List<String>): Int {
         val (stableRocks, unstableRocks) = stableAndUnstable(input)

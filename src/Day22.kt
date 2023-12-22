@@ -1,0 +1,99 @@
+import arrow.optics.copy
+import arrow.optics.optics
+
+
+fun main() {
+    fun Cuboid.moveDown() = copy {
+        Cuboid.p1.z set (p1.z - 1)
+        Cuboid.p2.z set (p2.z - 1)
+    }
+
+    fun Cuboid.belowGround(): Boolean {
+        return p1.z <= 0 || p2.z <= 0
+    }
+
+
+    fun Cuboid.nextPos(cuboids: Collection<Cuboid>): Cuboid {
+        val next = moveDown()
+        if (belowGround()) return this
+        for (cuboid in cuboids) {
+            if (this == cuboid) continue
+            if (next.intersects(cuboid)) return this
+        }
+        return next
+    }
+
+
+    fun parse(input: List<String>) = input.map { it.split(',', '~') }.map {
+        Cuboid(
+            Point3(it[0].toLong(), it[1].toLong(), it[2].toLong()),
+            Point3(it[3].toLong(), it[4].toLong(), it[5].toLong()),
+        )
+    }
+
+    fun List<Cuboid>.oneStep(): List<Cuboid> {
+        val source = toMutableList()
+        for ((index, cuboid) in source.withIndex()) {
+            source[index] = cuboid.nextPos(source)
+        }
+        return source.toList()
+    }
+
+    fun List<Cuboid>.fall(): List<Cuboid> {
+        var result = this
+        while (true) {
+            val next = result.oneStep()
+            if (next == result) break
+            else result = next
+        }
+        return result
+    }
+
+    fun Cuboid.findDependants(final: Set<Cuboid>): List<Cuboid> {
+        val updated = (final - this).toList()
+        return updated.oneStep().filterIndexed { index, cuboid ->
+            updated[index] != cuboid
+        }
+    }
+
+
+    fun solve(input: List<String>) {
+        val cuboids = parse(input).sortedBy { it.p1.z }.fall().toSet()
+        val res = cuboids.map { it.findDependants(cuboids) }
+        val a = res.count { it.isEmpty() }
+        val b = res.sumOf { it.size }
+        println("$a $b")
+    }
+
+
+    val test = readInput("22t1")
+    solve(test)
+    val input = readInput("22")
+    solve(input)
+}
+
+@optics
+data class Point3(val x: Long, val y: Long, val z: Long) {
+    companion object
+}
+
+@optics
+data class Cuboid(val p1: Point3, val p2: Point3) {
+    companion object
+}
+
+
+operator fun Point3.minus(other: Point3) = Point3(x - other.x, y - other.y, z - other.z)
+operator fun Cuboid.contains(point: Point3) = point.x in p1.x..p2.x &&
+        point.y in p1.y..p2.y &&
+        point.z in p1.z..p2.z
+
+fun Cuboid.intersects(other: Cuboid) =
+    (p2.x in other.p1.x..other.p2.x || other.p2.x in p1.x..p2.x) &&
+            (p2.y in other.p1.y..other.p2.y || other.p2.y in p1.y..p2.y) &&
+            (p2.z in other.p1.z..other.p2.z || other.p2.z in p1.z..p2.z)
+
+val Cuboid.volume
+    get() = (p1 - p2).product()
+
+private fun Point3.product() = x * y * z
