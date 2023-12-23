@@ -1,8 +1,6 @@
-import java.util.BitSet
-
-
 fun main() {
-    data class Edge(val start: BitSet, val end: BitSet, val distance: Int)
+    data class Edge(val start: Int, val end: Int, val distance: Int)
+
     val exits = mapOf(
         '<' to listOf(LEFT),
         '>' to listOf(RIGHT),
@@ -50,50 +48,42 @@ fun main() {
             .toMap()
     }
 
-    fun node(idx: Int): BitSet {
-        return BitSet().apply { set(idx) }
-    }
-
-    fun List<String>.makeGraph(): Pair<List<BitSet>, ArrayList<Edge>> {
+    fun List<String>.makeGraph(): Pair<List<Int>, ArrayList<Edge>> {
         val map = parseMap()
         val nodePositions = map.keys
             .filter { map.isFree(it) && !map.isRoad(it) }
             .sortedWith(compareBy({ it.y }, { it.x }))
 
 
-        val nodes = nodePositions.indices.map { node(it) }
         val edges = arrayListOf<Edge>()
         for (i in nodePositions.indices) {
             for (j in nodePositions.indices) {
                 if (i != j) {
                     val d = map.distance(nodePositions[i], nodePositions[j])
-                    if (d > 0) edges += Edge(nodes[i], nodes[j], d)
+                    if (d > 0) edges += Edge(i, j, d)
                 }
             }
         }
-        return Pair(nodes, edges)
+        return Pair(nodePositions.indices.toList(), edges)
     }
 
     fun List<String>.solve(): Int {
         val (nodes, edges) = makeGraph()
         val (start, goal) = Pair(nodes.first(), nodes.last())
 
-        val cache = HashMap<Pair<BitSet, BitSet>, Int>()
-        fun clone(visited: BitSet) = visited.clone() as BitSet
-
-        fun longestPath(node: BitSet, visited: BitSet): Int {
+        val cache = HashMap<Pair<Int, BooleanArray>, Int>()
+        fun longestPath(node: Int, visited: BooleanArray): Int {
             if (node == goal) return 0
-            else if (clone(visited).apply { and(node) }.cardinality() != 0) return Int.MIN_VALUE
+            else if (visited[node]) return Int.MIN_VALUE
             val key = Pair(node, visited)
-            if (!cache.containsKey(key)) {
-                cache[key] = edges
-                    .filter { it.start == node }
-                    .maxOfOrNull { it.distance + longestPath(it.end, clone(visited).apply { or(node) }) }
-                    ?: 0
-            }
+            if (key in cache) return cache[key] ?: 0
+            cache[key] = edges
+                .filter { it.start == node }
+                .maxOfOrNull { it.distance + longestPath(it.end, visited.copyOf().apply { this[node] = true }) }
+                ?: 0
             return cache[key] ?: 0
         }
-        return longestPath(start, BitSet())
+        return longestPath(start, BooleanArray(nodes.size))
     }
 
     fun partOne(input: List<String>): Any = input.solve()
