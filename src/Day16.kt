@@ -1,4 +1,6 @@
-data class Point(val x: Int, val y: Int)
+data class Point(val x: Int, val y: Int) {
+    constructor(x: Pair<Int, Int>) : this(x.first, x.second)
+}
 
 operator fun Point.minus(other: Point) = Point(x - other.x, y - other.y)
 
