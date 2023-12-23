@@ -1,8 +1,8 @@
 import java.util.BitSet
 
-data class Edge(val start: BitSet, val end: BitSet, val distance: Int)
 
 fun main() {
+    data class Edge(val start: BitSet, val end: BitSet, val distance: Int)
     val exits = mapOf(
         '<' to listOf(LEFT),
         '>' to listOf(RIGHT),
