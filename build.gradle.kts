@@ -22,4 +22,5 @@ dependencies {
     ksp("io.arrow-kt:arrow-optics-ksp-plugin:1.2.0")
     implementation("io.arrow-kt:arrow-core:1.2.0")
     implementation("org.apache.commons:commons-math4-legacy:4.0-beta1")
+    implementation("com.google.guava:guava:33.0.0-jre")
 }
