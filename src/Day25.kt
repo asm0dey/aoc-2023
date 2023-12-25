@@ -1,26 +1,28 @@
-import com.google.common.collect.ImmutableSet
 import com.google.common.graph.GraphBuilder
+import com.google.common.graph.Graphs
 import com.google.common.graph.ImmutableGraph
-import kotlin.math.min
 
+@Suppress("UnstableApiUsage")
 fun main() {
 
     val lines = readInput("25").map { it.split(*"->: ,;".toCharArray()).filter { it.isNotBlank() } }
         .map { it.first() to it.drop(1) }
     val names = lines.map { it.second + it.first }.flatten().distinct()
-    val x = GraphBuilder.undirected().allowsSelfLoops(true).build<String>()
-    for ((source, targets) in lines) {
-        for (target in targets) {
-            x.putEdge(source, target)
+    val x = GraphBuilder.undirected()
+        .immutable<String>()
+        .apply {
+            lines
+                .flatMap { (source, targets) ->
+                    targets.map {
+                        source to it
+                    }
+                }
+                .forEach { (a, b) -> putEdge(a, b) }
+
         }
-    }
-    val y = ImmutableGraph.copyOf(x)
-    val visited = hashSetOf(names.first())
-    val toVisit = ArrayDeque(y.adjacentNodes(visited.first()))
-    while (toVisit.isNotEmpty()) {
-        val removeFirst = toVisit.removeFirst()
-        visited.add(removeFirst)
-        toVisit.addAll(y.adjacentNodes(removeFirst).filterNot { it in visited })
-    }
-    println((visited.size-1) * (names.size - visited.size))
+        .build()
+    val set1 = Graphs.reachableNodes(x, names.first())
+    val set2 = Graphs.reachableNodes(x, names.first { it !in set1 })
+    println("$set1 $set2")
+    println(set1.size * set2.size)
 }
